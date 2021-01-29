@@ -5,10 +5,13 @@ import androidx.gridlayout.widget.GridLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 
@@ -17,8 +20,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int colNum=5;
     Button button1;
     Button button2;
+    Spinner spinner;
+    String[] nubs = {"Transpose","Upper Diagonal","Lower Diagonal"};
+//    Button button3;
     TextView row;
     TextView col;
+    int click_count;
     int mat[][];
     int mat2[][];
     EditText[][] editTexts;
@@ -34,6 +41,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         button1=(Button) findViewById(R.id.button);
         button2=(Button) findViewById(R.id.button2);
+//        button2=(Button) findViewById(R.id.button3);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,nubs);
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,country);
+        spinner.setAdapter(aa);
         row=(TextView) findViewById(R.id.textView);
         col=(TextView) findViewById(R.id.textView2);
         button1.setOnClickListener(this);
@@ -44,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //putting the edit text according to row and column index
     private void setPos(EditText editText, int row, int column) {
         GridLayout.LayoutParams param =new GridLayout.LayoutParams();
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setVisibility(View.VISIBLE);
         param.width = 100;
         param.height = 150;
         param.setGravity(Gravity.CENTER);
@@ -61,10 +76,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent passedIntent = getIntent();
             Bundle extras = passedIntent.getExtras();
 
-            editTexts = new EditText[rowNum][colNum];
+
 
             gridLayout = (GridLayout) findViewById(R.id.gridLayout);
-
+            gridLayout.removeAllViews();
+            editTexts = new EditText[rowNum][colNum];
             //define how many rows and columns to be used in the layout
             gridLayout.setRowCount(rowNum);
             gridLayout.setColumnCount(colNum);
@@ -76,42 +92,107 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     gridLayout.addView(editTexts[i][j]);
                 }
             }
-//            editTexts=null;
         }
-        if(v==button2)
-        {
-            for(int i=0;i<rowNum;i++)
-            {
-                for(int j=0;j<colNum;j++)
+        if(v==button2){
+            switch (spinner.getSelectedItemPosition()){
+                case  0:
                 {
-                    mat[i][j]= Integer.parseInt(editTexts[i][j].getText().toString());
-                }
-            }
+                    for(int i=0;i<rowNum;i++)
+                    {
+                        for(int j=0;j<colNum;j++)
+                        {
+                            mat[i][j]= Integer.parseInt(editTexts[i][j].getText().toString());
+                        }
+                    }
+                    gridLayout = (GridLayout) findViewById(R.id.gridLayout);
+                    gridLayout.removeAllViews();
+                    editTexts = new EditText[colNum][rowNum];
+                    gridLayout.setRowCount(colNum);
+                    gridLayout.setColumnCount(rowNum);
+                    for(int i=0;i<colNum;i++)
+                        {
+                            for(int j=0;j<rowNum;j++)
+                            {
+                                mat2[i][j]= mat[j][i];
+                            }
+                        }
+                    for (int i = 0; i < colNum; i++) {
+                        for (int j = 0; j < rowNum; j++) {
+//                            print()
+                            editTexts[i][j] = new EditText(this);
+                            setPos(editTexts[i][j], i, j);
+                            editTexts[i][j].setText(String.valueOf(mat2[i][j]));
+                            gridLayout.addView(editTexts[i][j]);
+                        }
 
-            for(int i=0;i<colNum;i++)
-            {
-                for(int j=0;j<rowNum;j++)
+                    }
+                    int temp=colNum;
+                    colNum=rowNum;
+                    rowNum=temp;
+                    break;
+                }
+                case 1:
                 {
-                    mat2[i][j]= mat[j][i];
+                    for(int i = 0; i < rowNum; i++){
+                            for(int j = 0; j < colNum; j++){
+                                if(i > j) editTexts[i][j].setText("");
+                            }
+                        }
+                    break;
                 }
-            }
-
-            gridLayout = (GridLayout) findViewById(R.id.gridLayout);
-            gridLayout.removeAllViews();
-            editTexts2 = new EditText[colNum][rowNum];
-            gridLayout.setRowCount(colNum);
-            gridLayout.setColumnCount(rowNum);
-
-            for (int i = 0; i < colNum; i++) {
-                for (int j = 0; j < rowNum; j++) {
-                    editTexts2[i][j] = new EditText(this);
-                    setPos(editTexts2[i][j], i, j);
-                    editTexts2[i][j].setText(String.valueOf(mat2[i][j]));
-                    gridLayout.addView(editTexts2[i][j]);
+                case 2:
+                {
+                    for(int i = 0; i < rowNum; i++){
+                        for(int j = 0; j < colNum; j++){
+                            if(i < j) editTexts[i][j].setText("");
+                        }
+                    }
                 }
+                default:
+                        System.out.println("Default case ");
             }
         }
-        editTexts2=null;
-
-    }
+//        if(v==button2)
+//        {
+//            for(int i=0;i<rowNum;i++)
+//            {
+//                for(int j=0;j<colNum;j++)
+//                {
+//                    mat[i][j]= Integer.parseInt(editTexts[i][j].getText().toString());
+//                }
+//            }
+//
+//            for(int i=0;i<colNum;i++)
+//            {
+//                for(int j=0;j<rowNum;j++)
+//                {
+//                    mat2[i][j]= mat[j][i];
+//                }
+//            }
+//
+//            gridLayout = (GridLayout) findViewById(R.id.gridLayout);
+//            gridLayout.removeAllViews();
+//            editTexts2 = new EditText[colNum][rowNum];
+//            gridLayout.setRowCount(colNum);
+//            gridLayout.setColumnCount(rowNum);
+//
+//            for (int i = 0; i < colNum; i++) {
+//                for (int j = 0; j < rowNum; j++) {
+//                    editTexts2[i][j] = new EditText(this);
+//                    setPos(editTexts2[i][j], i, j);
+//                    editTexts2[i][j].setText(String.valueOf(mat2[i][j]));
+//                    gridLayout.addView(editTexts2[i][j]);
+//                }
+//            }
+////            editTexts2=null;
+//        }
+//        if(v==button3){
+//            for(int i = 0; i < rowNum; i++){
+//                for(int j = 0; j < colNum; j++){
+//                    if(i > j) editTexts[i][j].setVisibility(View.INVISIBLE);
+//                }
+//            }
+//
+//        }
+        }
 }
